@@ -1,0 +1,14 @@
+# @package _global_
+data:
+  image_size: [128, 128]
+  batch_size: 8
+  train_workers: 0
+  valid_workers: 0
+  pin_memory: false
+
+logger: null
+
+trainer:
+  accelerator: cpu
+  precision: 32-true
+  fast_dev_run: true
