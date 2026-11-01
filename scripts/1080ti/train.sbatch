@@ -1,5 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=baseline-1080ti
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
 #SBATCH --partition=gpu_devel
 #SBATCH --qos=interactive
 #SBATCH --gres=gpu:geforce:1
@@ -13,7 +16,7 @@ cd ~/cu_segmentation_comp
 source .venv/bin/activate
 
 nvidia-smi
-python -u -m src.train \
+srun python -u -m src.train \
     experiment=001_baseline \
     trainer.accelerator=cuda \
     trainer.devices=1 \
@@ -21,4 +24,5 @@ python -u -m src.train \
     data.batch_size=4 \
     data.train_workers=3 \
     data.valid_workers=3 \
+    "hydra.run.dir=outputs/slurm_${SLURM_JOB_ID}" \
     "$@"
