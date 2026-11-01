@@ -19,3 +19,5 @@ outputs/
 data/
 
 .DS_Store
+
+*.zip

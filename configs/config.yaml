@@ -31,9 +31,10 @@ optimizer:
 scheduler: null
 
 logger:
-  _target_: lightning.pytorch.loggers.CometLogger
-  project: cv_logs
-  name: ${name}
+  _target_: lightning.pytorch.loggers.TensorBoardLogger
+  save_dir: ${hydra:runtime.output_dir}
+  name: tensorboard
+  version: ""
 
 trainer:
   max_epochs: 30
