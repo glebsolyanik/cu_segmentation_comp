@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=esrgan-bc-1080ti
+#SBATCH --job-name=segmentation_baseline
 #SBATCH --partition=gpu_devel
 #SBATCH --qos=interactive
 #SBATCH --gres=gpu:1
