@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 #SBATCH --job-name=baseline-1080ti
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -13,6 +13,7 @@
 set -euo pipefail
 
 cd ~/cu_segmentation_comp
+module load lib/openssl/3.5.0
 source .venv/bin/activate
 
 nvidia-smi

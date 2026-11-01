@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 #SBATCH --job-name=baseline-a100
 #SBATCH --partition=ais-gpu
 #SBATCH --gres=gpu:a100:1
@@ -9,6 +9,7 @@
 set -euo pipefail
 
 cd ~/cu_segmentation_comp
+module load lib/openssl/3.5.0
 source .venv/bin/activate
 
 nvidia-smi
