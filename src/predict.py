@@ -24,7 +24,7 @@ def main() -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("checkpoint", type=Path)
-    parser.add_argument("--test-dir", default="test/images")
+    parser.add_argument("--test-dir", default="data/test/test/images")
     parser.add_argument("--output", default="submission.csv")
     return parser.parse_args()
 

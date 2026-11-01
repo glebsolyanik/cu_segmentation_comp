@@ -8,7 +8,14 @@ wheels/
 
 # Virtual environments
 .venv
+.env
 
 outputs/
 
 *.ckpt
+
+.env
+
+data/
+
+.DS_Store

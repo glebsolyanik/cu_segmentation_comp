@@ -7,7 +7,7 @@ seed: 42
 checkpoint_dir: ${hydra:runtime.output_dir}/checkpoints
 
 data:
-  root: data
+  root: data/train/data
   image_size: [256, 256]
   batch_size: 64
   train_workers: 8

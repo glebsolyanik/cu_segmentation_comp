@@ -1,5 +1,8 @@
+from pathlib import Path
+
 import hydra
 import lightning as L
+from dotenv import load_dotenv
 from hydra.utils import instantiate
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 from omegaconf import DictConfig, OmegaConf
@@ -29,6 +32,7 @@ def build_logger(cfg: DictConfig):
     if cfg.logger is None:
         return False
 
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
     logger = instantiate(cfg.logger)
     logger.log_hyperparams(OmegaConf.to_container(cfg, resolve=True))
     return logger
