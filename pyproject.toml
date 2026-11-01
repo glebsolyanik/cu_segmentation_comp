@@ -29,7 +29,8 @@ required-environments = [
 ]
 minimum-libc-version = { glibc = "2.17" }
 
-no-build-package = ["numpy", "scipy"]
+# Select ready-made wheels compatible with the cluster instead of compiling C extensions.
+no-build-package = ["numpy", "scipy", "pillow"]
 
 [tool.uv.sources]
 # Use the reachable host directly; the CUDA index links to download-r2.pytorch.org.
