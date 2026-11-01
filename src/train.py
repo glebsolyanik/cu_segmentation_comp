@@ -5,6 +5,7 @@ import lightning as L
 from dotenv import load_dotenv
 from hydra.utils import instantiate
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
+from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from omegaconf import DictConfig, OmegaConf
 
 from src.data import PetDataModule
@@ -29,7 +30,7 @@ def main(cfg: DictConfig) -> None:
 
 
 def build_logger(cfg: DictConfig):
-    if cfg.logger is None:
+    if cfg.logger is None or rank_zero_only.rank != 0:
         return False
 
     load_dotenv(Path(__file__).resolve().parent.parent / ".env")

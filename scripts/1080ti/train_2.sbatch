@@ -16,8 +16,13 @@ cd ~/cu_segmentation_comp
 module load lib/openssl/3.5.0
 source .venv/bin/activate
 
+export NO_ALBUMENTATIONS_UPDATE=1
+export HYDRA_FULL_ERROR=1
+export SSL_CERT_FILE="${SSL_CERT_FILE:-$(python -m certifi)}"
+export REQUESTS_CA_BUNDLE="${REQUESTS_CA_BUNDLE:-$SSL_CERT_FILE}"
+
 nvidia-smi
-srun python -u -m src.train \
+srun --kill-on-bad-exit=1 python -u -m src.train \
     experiment=001_baseline \
     trainer.accelerator=cuda \
     trainer.devices=1 \
