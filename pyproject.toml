@@ -3,7 +3,7 @@ name = "week-6"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = "==3.12*"
+requires-python = "==3.12.*"
 dependencies = [
     "albumentations>=2.0.8",
     "comet-ml>=3.58.8",
@@ -27,7 +27,7 @@ required-environments = [
     "sys_platform == 'darwin' and platform_machine == 'arm64'",
 ]
 minimum-libc-version = { glibc = "2.17" }
-# Require prebuilt numerical libraries rather than compiling them on the cluster.
+
 no-build-package = ["numpy", "scipy"]
 
 [[tool.uv.index]]
