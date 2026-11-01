@@ -30,12 +30,9 @@ minimum-libc-version = { glibc = "2.17" }
 
 no-build-package = ["numpy", "scipy"]
 
-[[tool.uv.index]]
-name = "pytorch-cu124"
-url = "https://download.pytorch.org/whl/cu124"
-explicit = true
-
 [tool.uv.sources]
+# Use the reachable host directly; the CUDA index links to download-r2.pytorch.org.
+# This wheel targets the cluster's Python 3.12 on Linux x86_64.
 torch = [
-    { index = "pytorch-cu124", marker = "sys_platform == 'linux'" },
+    { url = "https://download.pytorch.org/whl/cu124/torch-2.6.0%2Bcu124-cp312-cp312-linux_x86_64.whl", marker = "sys_platform == 'linux'" },
 ]
