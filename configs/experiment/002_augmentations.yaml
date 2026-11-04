@@ -1,12 +1,15 @@
 # @package _global_
 name: 002_augmentations
 
+# Conservative natural-photo policy; apply only to training images/masks.
+# https://albumentations.ai/docs/3-basic-usage/choosing-augmentations/
+# https://albumentations.ai/docs/3-basic-usage/semantic-segmentation/
 data:
   train_augmentations:
     - _target_: albumentations.HorizontalFlip
       p: 0.5
     - _target_: albumentations.Affine
-      scale: [0.9, 1.1]
+      scale: [0.85, 1.15]
       keep_ratio: true
       translate_percent: [-0.05, 0.05]
       rotate: [-15, 15]
@@ -18,3 +21,20 @@ data:
       brightness_limit: 0.15
       contrast_limit: 0.15
       p: 0.3
+    - _target_: albumentations.HueSaturationValue
+      hue_shift_limit: 5
+      sat_shift_limit: 10
+      val_shift_limit: 5
+      p: 0.2
+    # At most one mild image-quality perturbation; masks are unchanged.
+    - _target_: albumentations.OneOf
+      p: 0.15
+      transforms:
+        - _target_: albumentations.GaussianBlur
+          blur_limit: [3, 3]
+          sigma_limit: [0.3, 0.7]
+          p: 1.0
+        - _target_: albumentations.GaussNoise
+          std_range: [0.01, 0.03]
+          mean_range: [0.0, 0.0]
+          p: 1.0
