@@ -6,6 +6,7 @@ import cv2
 import lightning as L
 import numpy as np
 import torch
+from hydra.utils import instantiate
 from torch.utils.data import DataLoader, Dataset
 
 
@@ -18,6 +19,7 @@ class PetDataModule(L.LightningDataModule):
         train_workers: int,
         valid_workers: int,
         pin_memory: bool,
+        train_augmentations: list | None = None,
     ) -> None:
         super().__init__()
         self.root = root
@@ -26,9 +28,12 @@ class PetDataModule(L.LightningDataModule):
         self.train_workers = train_workers
         self.valid_workers = valid_workers
         self.pin_memory = pin_memory
+        self.train_augmentations = [instantiate(transform) for transform in (train_augmentations or [])]
 
     def setup(self, stage: str) -> None:
-        self.train_dataset = PetDataset(self.root, "trainval", build_transform(self.image_size))
+        self.train_dataset = PetDataset(
+            self.root, "trainval", build_transform(self.image_size, self.train_augmentations)
+        )
         self.valid_dataset = PetDataset(self.root, "test", build_transform(self.image_size))
 
     def train_dataloader(self) -> DataLoader:
@@ -48,9 +53,12 @@ class PetDataModule(L.LightningDataModule):
         )
 
 
-def build_transform(image_size: tuple[int, int]) -> A.Compose:
+def build_transform(
+    image_size: tuple[int, int], augmentations: list[A.BasicTransform] | None = None
+) -> A.Compose:
     return A.Compose([
         A.Resize(*image_size),
+        *(augmentations or []),
         A.ToFloat(),
         A.ToTensorV2(transpose_mask=True),
     ])

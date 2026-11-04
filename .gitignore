@@ -21,3 +21,9 @@ data/
 .DS_Store
 
 *.zip
+
+/predictions
+
+/notebooks
+
+/docs

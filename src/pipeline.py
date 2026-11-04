@@ -48,7 +48,8 @@ class LightningPipeline(L.LightningModule):
         metric = getattr(self, f"{stage}_metric")
         metric(pred_masks, masks.long())
 
-        self.log(f"{stage}_loss", loss, prog_bar=True, on_step=True, on_epoch=False)
+        self.log(f"{stage}_loss_step", loss, prog_bar=True, on_step=True, on_epoch=False)
+        self.log(f"{stage}_loss_epoch", loss, prog_bar=True, on_step=False, on_epoch=True, sync_dist=True)
         self.log(f"{stage}_iou", metric, prog_bar=True, on_step=False, on_epoch=True)
         return loss
 
