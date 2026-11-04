@@ -20,6 +20,7 @@ class PetDataModule(L.LightningDataModule):
         valid_workers: int,
         pin_memory: bool,
         train_augmentations: list | None = None,
+        valid_mask_size: tuple[int, int] | None = None,
     ) -> None:
         super().__init__()
         self.root = root
@@ -29,12 +30,15 @@ class PetDataModule(L.LightningDataModule):
         self.valid_workers = valid_workers
         self.pin_memory = pin_memory
         self.train_augmentations = [instantiate(transform) for transform in (train_augmentations or [])]
+        self.valid_mask_size = valid_mask_size
 
     def setup(self, stage: str) -> None:
         self.train_dataset = PetDataset(
             self.root, "trainval", build_transform(self.image_size, self.train_augmentations)
         )
-        self.valid_dataset = PetDataset(self.root, "test", build_transform(self.image_size))
+        self.valid_dataset = PetDataset(
+            self.root, "test", build_transform(self.image_size), mask_size=self.valid_mask_size
+        )
 
     def train_dataloader(self) -> DataLoader:
         return self._dataloader(self.train_dataset, self.train_workers, shuffle=True)
@@ -68,9 +72,13 @@ class PetDataset(Dataset):
     BORDER = 1
     PET = 3
 
-    def __init__(self, root: str, split: str, transform: Callable | None = None) -> None:
+    def __init__(
+        self, root: str, split: str, transform: Callable | None = None,
+        mask_size: tuple[int, int] | None = None,
+    ) -> None:
         super().__init__()
         self.transform = transform
+        self.mask_size = mask_size
         self.images_dir = os.path.join(root, "images", "images")
         annotations_dir = os.path.join(root, "annotations", "annotations")
         self.masks_dir = os.path.join(annotations_dir, "trimaps")
@@ -85,10 +93,20 @@ class PetDataset(Dataset):
         name = self.image_names[idx]
         image = self._load_image(name)
         mask = self._load_mask(name)
+        # Resize scoring targets directly from the original annotation, never
+        # through the model's input resolution (e.g. original -> 384 -> 256).
+        score_mask = None
+        if self.mask_size is not None:
+            height, width = self.mask_size
+            score_mask = torch.from_numpy(
+                cv2.resize(mask, (width, height), interpolation=cv2.INTER_NEAREST)
+            ).float()
 
         if self.transform:
             transformed = self.transform(image=image, mask=mask)
             image, mask = transformed["image"], transformed["mask"].float()
+        if score_mask is not None:
+            mask = score_mask
         return image, mask
 
     def _load_image(self, name: str) -> np.ndarray:

@@ -4,7 +4,7 @@ import hydra
 import lightning as L
 from dotenv import load_dotenv
 from hydra.utils import instantiate
-from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
+from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, TQDMProgressBar
 from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from omegaconf import DictConfig, OmegaConf
 
@@ -16,7 +16,7 @@ from src.pipeline import LightningPipeline
 def main(cfg: DictConfig) -> None:
     L.seed_everything(cfg.seed)
 
-    datamodule = PetDataModule(**cfg.data)
+    datamodule = PetDataModule(**cfg.data, valid_mask_size=cfg.evaluation.image_size)
     pipeline = LightningPipeline(
         model=instantiate(cfg.model),
         loss=instantiate(cfg.loss),
@@ -42,6 +42,7 @@ def build_logger(cfg: DictConfig):
 def build_callbacks(cfg: DictConfig, logger) -> list:
     callbacks = [
         ModelCheckpoint(dirpath=cfg.checkpoint_dir, monitor="valid_iou", mode="max", save_top_k=1, save_last=True),
+        TQDMProgressBar(refresh_rate=50),
     ]
     if logger:
         callbacks.append(LearningRateMonitor(logging_interval="epoch"))

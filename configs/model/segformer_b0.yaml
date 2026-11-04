@@ -1,0 +1,6 @@
+_target_: src.models.SMPModel
+architecture: Segformer
+encoder_name: mit_b0
+encoder_weights: null
+in_channels: 3
+num_classes: 1

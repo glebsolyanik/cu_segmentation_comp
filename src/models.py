@@ -2,6 +2,38 @@ import torch
 import torch.nn as nn
 
 
+class SMPModel(nn.Module):
+    """SMP segmenter accepting RGB tensors in [0, 1], including at inference."""
+
+    def __init__(
+        self,
+        architecture: str,
+        encoder_name: str,
+        encoder_weights: str | None = None,
+        in_channels: int = 3,
+        num_classes: int = 1,
+    ) -> None:
+        super().__init__()
+        import segmentation_models_pytorch as smp
+
+        if in_channels != 3:
+            raise ValueError("SMPModel expects RGB inputs for ImageNet normalization")
+        if architecture not in {"Unet", "Segformer"}:
+            raise ValueError(f"Unsupported architecture: {architecture}")
+        self.segmenter = getattr(smp, architecture)(
+            encoder_name=encoder_name,
+            encoder_weights=encoder_weights,
+            in_channels=in_channels,
+            classes=num_classes,
+            activation=None,
+        )
+        self.register_buffer("mean", torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1))
+        self.register_buffer("std", torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1))
+
+    def forward(self, images: torch.Tensor) -> torch.Tensor:
+        return self.segmenter((images - self.mean) / self.std)
+
+
 class BasicUnet(nn.Module):
     def __init__(self, in_channels: int = 3, num_classes: int = 1, base_channels: int = 64) -> None:
         super().__init__()

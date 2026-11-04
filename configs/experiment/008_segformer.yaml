@@ -1,0 +1,8 @@
+# @package _global_
+defaults:
+  - 002_augmentations
+  - override /model: segformer_b0
+  - _self_
+
+# Trained from scratch, like the seminar implementation.
+name: 008_segformer

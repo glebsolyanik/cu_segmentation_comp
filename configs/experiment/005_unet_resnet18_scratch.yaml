@@ -1,0 +1,8 @@
+# @package _global_
+defaults:
+  - 002_augmentations
+  - override /model: unet_resnet18
+  - _self_
+
+# Architecture control for 006; both use the same ImageNet input normalization.
+name: 005_unet_resnet18_scratch

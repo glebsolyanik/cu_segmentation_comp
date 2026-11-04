@@ -1,0 +1,10 @@
+# @package _global_
+defaults:
+  - 002_augmentations
+  - _self_
+
+name: 003_bce_dice
+loss:
+  _target_: src.losses.BCEDiceLoss
+  bce_weight: 0.5
+  dice_weight: 0.5

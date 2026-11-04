@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - 002_augmentations
+  - _self_
+
+name: 007_resolution384
+data:
+  image_size: [384, 384]
+# Validation still scores against evaluation.image_size, matching 002.

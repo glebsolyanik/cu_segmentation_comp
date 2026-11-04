@@ -1,0 +1,6 @@
+_target_: src.models.SMPModel
+architecture: Unet
+encoder_name: resnet18
+encoder_weights: null
+in_channels: 3
+num_classes: 1

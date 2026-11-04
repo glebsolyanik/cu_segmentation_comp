@@ -26,4 +26,5 @@ python -u -m src.train \
     data.batch_size=32 \
     data.train_workers=6 \
     data.valid_workers=6 \
+    "hydra.run.dir=outputs/slurm_${SLURM_JOB_ID}" \
     "$@"

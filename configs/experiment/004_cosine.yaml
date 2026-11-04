@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - 002_augmentations
+  - _self_
+
+name: 004_cosine
+scheduler:
+  _target_: torch.optim.lr_scheduler.CosineAnnealingLR
+  _partial_: true
+  T_max: ${trainer.max_epochs}
+  eta_min: 1e-6

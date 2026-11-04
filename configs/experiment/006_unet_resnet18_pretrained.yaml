@@ -1,0 +1,8 @@
+# @package _global_
+defaults:
+  - 005_unet_resnet18_scratch
+  - _self_
+
+name: 006_unet_resnet18_pretrained
+model:
+  encoder_weights: imagenet

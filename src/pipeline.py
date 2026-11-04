@@ -3,6 +3,7 @@ from typing import Callable
 import lightning as L
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torchmetrics.segmentation as tms
 
 
@@ -42,9 +43,19 @@ class LightningPipeline(L.LightningModule):
     def shared_step(self, batch: tuple[torch.Tensor, torch.Tensor], stage: str) -> torch.Tensor:
         images, masks = batch
         mask_logits = self(images)
+        probabilities = mask_logits.sigmoid()
+        if stage == "valid" and mask_logits.shape[-2:] != masks.shape[-2:]:
+            probabilities = F.interpolate(
+                probabilities.unsqueeze(1), size=masks.shape[-2:],
+                mode="bilinear", align_corners=False,
+            ).squeeze(1)
+            mask_logits = F.interpolate(
+                mask_logits.unsqueeze(1), size=masks.shape[-2:],
+                mode="bilinear", align_corners=False,
+            ).squeeze(1)
         loss = self.loss_fn(mask_logits, masks)
 
-        pred_masks = (mask_logits.sigmoid() > 0.5).long()
+        pred_masks = (probabilities > 0.5).long()
         metric = getattr(self, f"{stage}_metric")
         metric(pred_masks, masks.long())
 
