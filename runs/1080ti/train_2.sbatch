@@ -32,5 +32,5 @@ srun --kill-on-bad-exit=1 python -u -m src.train \
     data.batch_size=4 \
     data.train_workers=3 \
     data.valid_workers=3 \
-    "hydra.run.dir=outputs/slurm_${SLURM_JOB_ID}" \
+    "hydra.run.dir=outputs/\${name}_${SLURM_JOB_ID}" \
     "$@"

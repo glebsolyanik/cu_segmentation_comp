@@ -1,0 +1,8 @@
+# @package _global_
+defaults:
+  - 006_unet_resnet18_pretrained
+  - _self_
+
+name: 009_unet_resnet18_pretrained_resolution384
+data:
+  image_size: [384, 384]

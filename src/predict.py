@@ -1,5 +1,6 @@
 import argparse
 import csv
+import json
 import os
 from pathlib import Path
 
@@ -13,32 +14,64 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 
+def experiment_name(source: Path) -> str:
+    metadata = source.with_suffix(source.suffix + ".json")
+    if metadata.is_file():
+        return json.loads(metadata.read_text())["experiment"]
+    for directory in source.parents:
+        config = directory / ".hydra/config.yaml"
+        if config.is_file():
+            return str(OmegaConf.load(config).name)
+    return source.parent.name
+
+
 def main() -> None:
     args = parse_args()
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    name = experiment_name(args.checkpoint)
+    output = args.output or Path("predictions") / "test" / name / "submission.csv"
+    output.parent.mkdir(parents=True, exist_ok=True)
 
     model = load_model(args.checkpoint).to(device).eval()
     dataloader = DataLoader(TestDataset(args.test_dir), batch_size=1, num_workers=4)
     write_submission(
-        model, dataloader, args.output, device,
+        model, dataloader, output, device,
         threshold=args.threshold, hflip_tta=args.hflip_tta,
         input_size=tuple(args.input_size) if args.input_size else None,
     )
+    output.with_suffix(output.suffix + ".json").write_text(json.dumps({
+        "experiment": name, "checkpoint": str(args.checkpoint),
+        "input_size": args.input_size, "threshold": args.threshold, "hflip_tta": args.hflip_tta,
+    }, indent=2) + "\n")
+    print(f"Saved {output}")
+    if args.visualize:
+        from src.visualize import visualize_submission
+
+        visualize_submission(argparse.Namespace(
+            submission=output, test_dir=Path(args.test_dir),
+            output_dir=output.parent / output.stem,
+            num_images=args.num_images, seed=args.seed,
+        ))
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("checkpoint", type=Path)
     parser.add_argument("--test-dir", default="data/test/test/images")
-    parser.add_argument("--output", default="submission.csv")
+    parser.add_argument("--output", type=Path, help="Default: predictions/test/<experiment>/submission.csv")
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--hflip-tta", action="store_true")
     parser.add_argument("--input-size", type=int, nargs=2, metavar=("HEIGHT", "WIDTH"))
+    parser.add_argument("--visualize", action="store_true", help="Save preview PNGs after creating submission")
+    parser.add_argument("--num-images", type=int, default=20, help="Number of preview images with --visualize")
+    parser.add_argument("--seed", type=int, default=42, help="Seed for preview image selection")
     args = parser.parse_args()
     if not 0 < args.threshold < 1:
         parser.error("--threshold must be between 0 and 1")
     if args.input_size and any(size <= 0 for size in args.input_size):
         parser.error("--input-size dimensions must be positive")
+    if args.num_images < 1:
+        parser.error("--num-images must be positive")
     return args
 
 

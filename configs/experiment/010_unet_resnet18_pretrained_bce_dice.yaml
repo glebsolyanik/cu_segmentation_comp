@@ -1,0 +1,11 @@
+# @package _global_
+defaults:
+  - 006_unet_resnet18_pretrained
+  - _self_
+
+name: 010_unet_resnet18_pretrained_bce_dice
+loss:
+  _target_: src.losses.BCEDiceLoss
+  bce_weight: 0.5
+  dice_weight: 0.5
+
