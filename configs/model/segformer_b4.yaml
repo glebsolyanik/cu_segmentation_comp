@@ -1,0 +1,5 @@
+defaults:
+  - segformer_b0
+  - _self_
+
+encoder_name: mit_b4

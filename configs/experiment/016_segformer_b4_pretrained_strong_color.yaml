@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - 014_segformer_pretrained_strong_color
+  - override /model: segformer_b4
+  - _self_
+
+name: 016_segformer_b4_pretrained_strong_color
+
+# Same 384x384 data, augmentations, decoder, loss and optimizer as 014.
+# Change only the MiT encoder from B0 to B4; initialize from ImageNet.
+model:
+  encoder_weights: imagenet
