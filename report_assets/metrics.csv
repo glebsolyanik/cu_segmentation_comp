@@ -1,0 +1,16 @@
+experiment,best_epoch,valid_iou,train_iou,train_loss,valid_loss,recorded_epochs,config
+001_baseline,30,0.8564701676368713,0.9365476965904236,0.0655,0.24351,30,outputs/slurm_8518584/.hydra/config.yaml
+002_augmentations,29,0.8754472732543945,0.886273205280304,0.13285,0.15444,30,outputs/slurm_8521678/.hydra/config.yaml
+003_bce_dice,29,0.874984860420227,0.8889346718788147,0.11432,0.13231,30,outputs/slurm_8521722/.hydra/config.yaml
+004_cosine,26,0.8756162524223328,0.8953827023506165,0.12033,0.15153,30,outputs/slurm_8521723/.hydra/config.yaml
+005_unet_resnet18_scratch,29,0.8669611215591431,0.8861865401268005,0.13229,0.16505,30,outputs/slurm_8523293/.hydra/config.yaml
+006_unet_resnet18_pretrained,26,0.9163438677787781,0.9351699948310852,0.06852,0.11301,30,outputs/slurm_8523294/.hydra/config.yaml
+007_resolution384,27,0.8696895837783813,0.8751641511917114,0.14763,0.15916,30,outputs/slurm_8521726/.hydra/config.yaml
+008_segformer,29,0.8569090962409973,0.8630073666572571,0.1637,0.17639,30,outputs/slurm_8523295/.hydra/config.yaml
+009_unet_resnet18_pretrained_resolution384,29,0.9196569323539734,0.9422310590744019,0.05938,0.11204,30,outputs/009_unet_resnet18_pretrained_resolution384_8526354/.hydra/config.yaml
+010_unet_resnet18_pretrained_bce_dice,22,0.9182597398757935,0.9336065053939819,0.06263,0.08757,30,outputs/010_unet_resnet18_pretrained_bce_dice_8526355/.hydra/config.yaml
+011_segformer_pretrained,25,0.9245173335075378,0.9340447783470154,0.07024,0.10092,30,outputs/011_segformer_pretrained_8526625/.hydra/config.yaml
+012_unet_resnet18_pretrained_scale_shift,10,0.9166203141212463,0.9233641624450684,0.0764,0.10311,17,outputs/012_unet_resnet18_pretrained_scale_shift_8526646/.hydra/config.yaml
+013_unet_resnet18_pretrained_strong_color,17,0.91684889793396,0.9270620346069336,0.07071,0.10455,17,outputs/013_unet_resnet18_pretrained_strong_color_8526647/.hydra/config.yaml
+014_segformer_pretrained_strong_color,12,0.9268086552619934,0.9252197742462158,0.07404,0.09194,19,outputs/014_segformer_pretrained_strong_color_8526741/.hydra/config.yaml
+015_unet_resnet18_pretrained_people,19,0.9194077849388123,0.9148893356323242,0.06673,0.10117,26,outputs/015_unet_resnet18_pretrained_people_8526764/.hydra/config.yaml

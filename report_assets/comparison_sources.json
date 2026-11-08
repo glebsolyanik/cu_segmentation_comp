@@ -1,0 +1,74 @@
+{
+  "image_ids": [
+    143,
+    333,
+    0
+  ],
+  "submissions": [
+    {
+      "csv": "predictions/test/001_baseline/submission.csv",
+      "metadata": {
+        "experiment": "001_baseline",
+        "checkpoint": "outputs/slurm_8518584/checkpoints/epoch=29-step=13800.ckpt",
+        "input_size": [
+          256,
+          256
+        ],
+        "threshold": 0.5,
+        "hflip_tta": false
+      }
+    },
+    {
+      "csv": "predictions/test/009_unet_resnet18_pretrained_resolution384/submission.csv",
+      "metadata": {
+        "experiment": "009_unet_resnet18_pretrained_resolution384",
+        "checkpoint": "outputs/009_unet_resnet18_pretrained_resolution384_8526354/checkpoints/epoch=28-step=13340.ckpt",
+        "input_size": [
+          384,
+          384
+        ],
+        "threshold": 0.5,
+        "hflip_tta": false
+      }
+    },
+    {
+      "csv": "predictions/test/013_unet_resnet18_pretrained_strong_color/submission.csv",
+      "metadata": {
+        "experiment": "013_unet_resnet18_pretrained_strong_color",
+        "checkpoint": "outputs/013_unet_resnet18_pretrained_strong_color_8526647/checkpoints/epoch=16-step=7820.ckpt",
+        "input_size": [
+          512,
+          512
+        ],
+        "threshold": 0.5,
+        "hflip_tta": false
+      }
+    },
+    {
+      "csv": "predictions/test/014_segformer_pretrained_strong_color/submission.csv",
+      "metadata": {
+        "experiment": "014_segformer_pretrained_strong_color",
+        "checkpoint": "outputs/014_segformer_pretrained_strong_color_8526741/checkpoints/epoch=11-step=5520.ckpt",
+        "input_size": [
+          512,
+          512
+        ],
+        "threshold": 0.5,
+        "hflip_tta": false
+      }
+    },
+    {
+      "csv": "predictions/test/015_unet_resnet18_pretrained_people/submission.csv",
+      "metadata": {
+        "experiment": "015_unet_resnet18_pretrained_people",
+        "checkpoint": "outputs/015_unet_resnet18_pretrained_people_8526764/checkpoints/epoch=18-step=9633.ckpt",
+        "input_size": [
+          512,
+          512
+        ],
+        "threshold": 0.5,
+        "hflip_tta": false
+      }
+    }
+  ]
+}
