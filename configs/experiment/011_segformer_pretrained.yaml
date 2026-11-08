@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - 008_segformer
+  - _self_
+
+name: 011_segformer_pretrained
+
+model:
+  encoder_weights: imagenet
