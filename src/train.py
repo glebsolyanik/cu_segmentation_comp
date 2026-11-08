@@ -4,7 +4,7 @@ import hydra
 import lightning as L
 from dotenv import load_dotenv
 from hydra.utils import instantiate
-from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, TQDMProgressBar
+from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint, TQDMProgressBar
 from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from omegaconf import DictConfig, OmegaConf
 
@@ -42,6 +42,7 @@ def build_logger(cfg: DictConfig):
 def build_callbacks(cfg: DictConfig, logger) -> list:
     callbacks = [
         ModelCheckpoint(dirpath=cfg.checkpoint_dir, monitor="valid_iou", mode="max", save_top_k=1, save_last=True),
+        EarlyStopping(monitor="valid_iou", mode="max", patience=7, min_delta=0.001),
         TQDMProgressBar(refresh_rate=50),
     ]
     if logger:
