@@ -1,4 +1,6 @@
 import os
+import json
+from pathlib import Path
 from typing import Callable
 
 import albumentations as A
@@ -7,7 +9,7 @@ import lightning as L
 import numpy as np
 import torch
 from hydra.utils import instantiate
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import ConcatDataset, DataLoader, Dataset
 
 
 class PetDataModule(L.LightningDataModule):
@@ -21,6 +23,7 @@ class PetDataModule(L.LightningDataModule):
         pin_memory: bool,
         train_augmentations: list | None = None,
         valid_mask_size: tuple[int, int] | None = None,
+        external_root: str | None = None,
     ) -> None:
         super().__init__()
         self.root = root
@@ -31,11 +34,17 @@ class PetDataModule(L.LightningDataModule):
         self.pin_memory = pin_memory
         self.train_augmentations = [instantiate(transform) for transform in (train_augmentations or [])]
         self.valid_mask_size = valid_mask_size
+        self.external_root = external_root
 
     def setup(self, stage: str) -> None:
         self.train_dataset = PetDataset(
             self.root, "trainval", build_transform(self.image_size, self.train_augmentations)
         )
+        if self.external_root:
+            external = ExternalPetDataset(
+                self.external_root, build_transform(self.image_size, self.train_augmentations)
+            )
+            self.train_dataset = ConcatDataset([self.train_dataset, external])
         self.valid_dataset = PetDataset(
             self.root, "test", build_transform(self.image_size), mask_size=self.valid_mask_size
         )
@@ -66,6 +75,34 @@ def build_transform(
         A.ToFloat(),
         A.ToTensorV2(transpose_mask=True),
     ])
+
+
+class ExternalPetDataset(Dataset):
+    """Prepared external binary masks: 1 = cat/dog, 0 = everything else."""
+
+    def __init__(self, root: str, transform: Callable) -> None:
+        self.root = Path(root)
+        self.transform = transform
+        manifest = json.loads((self.root / "manifest.json").read_text())
+        if manifest.get("training_allowed") is False:
+            raise ValueError(f"External dataset is marked as unsuitable for training: {root}")
+        self.samples = manifest["samples"]
+        if not self.samples:
+            raise ValueError(f"No external training examples in {root}")
+
+    def __len__(self) -> int:
+        return len(self.samples)
+
+    def __getitem__(self, index: int) -> tuple[torch.Tensor, torch.Tensor]:
+        sample = self.samples[index]
+        image = cv2.imread(str(self.root / sample["image"]))
+        mask = cv2.imread(str(self.root / sample["mask"]), cv2.IMREAD_GRAYSCALE)
+        if image is None or mask is None:
+            raise OSError(f"Cannot read external sample {sample['name']}")
+        if image.shape[:2] != mask.shape or not np.isin(mask, [0, 1]).all():
+            raise ValueError(f"Invalid external binary mask: {sample['name']}")
+        result = self.transform(image=cv2.cvtColor(image, cv2.COLOR_BGR2RGB), mask=mask)
+        return result["image"], result["mask"].float()
 
 
 class PetDataset(Dataset):

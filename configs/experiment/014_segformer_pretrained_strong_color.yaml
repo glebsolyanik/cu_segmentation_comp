@@ -1,0 +1,15 @@
+# @package _global_
+defaults:
+  - 013_unet_resnet18_pretrained_strong_color
+  - override /model: segformer_b0
+  - _self_
+
+name: 014_segformer_pretrained_strong_color
+
+# Match 013's resolution and augmentation policy, changing only the architecture.
+# Compared with 011, both resolution and augmentation policy change.
+data:
+  image_size: [384, 384]
+
+model:
+  encoder_weights: imagenet
