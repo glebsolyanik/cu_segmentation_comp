@@ -11,8 +11,8 @@ import numpy as np
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--data-root", type=Path, default=Path("data/external/coco_people"))
-    parser.add_argument("--output-dir", type=Path, default=Path("predictions/dataset/coco_people"))
+    parser.add_argument("--data-root", type=Path, default=Path("data/external/coco_people_train2017"))
+    parser.add_argument("--output-dir", type=Path, default=Path("predictions/dataset/coco_people_train2017"))
     parser.add_argument("--per-group", type=int, default=12)
     args = parser.parse_args()
     if args.per_group < 1:

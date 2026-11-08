@@ -2,6 +2,7 @@
 
 Only COCO train2017 photos selected by instance annotations are downloaded.
 Foreground is the union of cat/dog polygons; person-only examples have zero masks.
+Images annotated with other animal classes are excluded from both groups.
 Crowd/nonpolygon target annotations are excluded, not treated as background.
 """
 
@@ -24,6 +25,7 @@ from tqdm import tqdm
 
 ANNOTATIONS_URL = "https://s3.amazonaws.com/images.cocodataset.org/annotations/annotations_trainval2017.zip"
 IMAGES_URL = "https://s3.amazonaws.com/images.cocodataset.org/train2017/"
+ANIMAL_CLASSES = {"bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe"}
 
 
 class RemoteZipFile(io.RawIOBase):
@@ -112,6 +114,7 @@ def dhash(image: np.ndarray) -> int:
 def candidates(data: dict) -> dict[str, list[tuple[dict, list]]]:
     categories = {category["name"]: category["id"] for category in data["categories"]}
     pet_ids = {categories["cat"], categories["dog"]}
+    other_animal_ids = {value for name, value in categories.items() if name in ANIMAL_CLASSES - {"cat", "dog"}}
     person_id = categories["person"]
     by_image = defaultdict(list)
     for annotation in data["annotations"]:
@@ -119,6 +122,8 @@ def candidates(data: dict) -> dict[str, list[tuple[dict, list]]]:
     result = {"person_pet": [], "person_only": []}
     for image in data["images"]:
         annotations = by_image[image["id"]]
+        if any(ann["category_id"] in other_animal_ids for ann in annotations):
+            continue
         people = [ann for ann in annotations if ann["category_id"] == person_id]
         pets = [ann for ann in annotations if ann["category_id"] in pet_ids]
         if not people:
@@ -146,6 +151,9 @@ def main():
         parser.error("pets-root must contain Oxford images for duplicate screening")
     if not args.test_root.is_dir():
         parser.error("test-root must contain competition test images for duplicate screening")
+    previous_manifest = args.output_dir / "manifest.json"
+    if previous_manifest.exists() and json.loads(previous_manifest.read_text()).get("training_allowed") is False:
+        parser.error("This directory contains a rejected dataset; use a separate output-dir")
     annotations = args.cache_dir / "instances_train2017.json"
     if not annotations.exists():
         print("Fetching only train2017 instance annotations from official ZIP...", flush=True)
@@ -154,10 +162,14 @@ def main():
         with zipfile.ZipFile(archive if archive.exists() else RemoteZipFile(ANNOTATIONS_URL, prefix)) as file:
             content = file.read("annotations/instances_train2017.json")
         args.cache_dir.mkdir(parents=True, exist_ok=True)
-        annotations.write_bytes(content)
+        partial = annotations.with_suffix(".json.part")
+        partial.write_bytes(content)
+        partial.replace(annotations)
         del content
     data = json.loads(annotations.read_text())
     groups = candidates(data)
+    licenses = data["licenses"]
+    del data
     print("Available candidates:", {key: len(value) for key, value in groups.items()}, flush=True)
     # Screen against Oxford AND competition test photos: external annotations
     # must not introduce training on the hidden test's ground-truth masks.
@@ -217,7 +229,8 @@ def main():
         print(f"Selected {group}: {count}", flush=True)
     manifest = {"dataset": "COCO train2017", "training_allowed": True, "annotations_url": ANNOTATIONS_URL,
                 "seed": args.seed, "rasterization": "cv2.fillPoly on rounded COCO polygon coordinates",
-                "foreground": ["cat", "dog"], "licenses": data["licenses"],
+                "foreground": ["cat", "dog"], "licenses": licenses,
+                "excluded_animal_classes": sorted(ANIMAL_CLASSES - {"cat", "dog"}),
                 "duplicate_screen": "64-bit dHash distance <= 4 against all Oxford photos, competition test photos and selected COCO photos; heuristic, not a guarantee",
                 "rejected_duplicates": rejected, "samples": rows}
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")

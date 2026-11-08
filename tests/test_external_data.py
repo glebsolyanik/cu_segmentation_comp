@@ -24,10 +24,11 @@ class ExternalDataTests(unittest.TestCase):
         def ann(image, category, crowd=0):
             return {"image_id": image, "category_id": category, "iscrowd": crowd,
                     "segmentation": [[1, 1, 3, 1, 3, 3]]}
-        data = {"categories": [{"id": 1, "name": "person"}, {"id": 17, "name": "cat"}, {"id": 18, "name": "dog"}],
-                "images": [{"id": i} for i in range(1, 5)],
+        data = {"categories": [{"id": 1, "name": "person"}, {"id": 17, "name": "cat"}, {"id": 18, "name": "dog"}, {"id": 20, "name": "sheep"}],
+                "images": [{"id": i} for i in range(1, 7)],
                 "annotations": [ann(1, 1), ann(1, 18), ann(2, 1),
-                                ann(3, 1), ann(3, 18, crowd=1), ann(4, 18)]}
+                                ann(3, 1), ann(3, 18, crowd=1), ann(4, 18),
+                                ann(5, 1), ann(5, 20), ann(6, 1), ann(6, 18), ann(6, 20)]}
         groups = candidates(data)
         self.assertEqual([image["id"] for image, _ in groups["person_pet"]], [1])
         self.assertEqual([image["id"] for image, _ in groups["person_only"]], [2])

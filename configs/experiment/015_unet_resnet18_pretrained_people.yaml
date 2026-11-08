@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - 013_unet_resnet18_pretrained_strong_color
+  - _self_
+
+name: 015_unet_resnet18_pretrained_people
+
+# Prepare: python scripts/prepare_coco_people.py
+# Append the curated COCO train2017 subset (up to 200 examples per group).
+# Foreground is cats/dogs only; Oxford validation stays unchanged.
+data:
+  external_root: data/external/coco_people_train2017
