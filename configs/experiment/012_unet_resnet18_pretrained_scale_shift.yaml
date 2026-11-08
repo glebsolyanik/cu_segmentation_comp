@@ -1,0 +1,55 @@
+# @package _global_
+defaults:
+  - 009_unet_resnet18_pretrained_resolution384
+  - _self_
+
+name: 012_unet_resnet18_pretrained_scale_shift
+
+# Geometry mix: 50% no affine, 25% original mild affine, 25% small/off-center.
+# Other augmentations and all model/optimizer/evaluation settings match 009.
+data:
+  train_augmentations:
+    - _target_: albumentations.HorizontalFlip
+      p: 0.5
+    - _target_: albumentations.OneOf
+      p: 0.5
+      transforms:
+        - _target_: albumentations.Affine
+          scale: [0.85, 1.15]
+          keep_ratio: true
+          translate_percent: [-0.05, 0.05]
+          rotate: [-15, 15]
+          mask_interpolation: 0
+          fill: 0
+          fill_mask: 0
+          p: 1.0
+        - _target_: albumentations.Affine
+          scale: [0.4, 0.75]
+          keep_ratio: true
+          translate_percent: [-0.3, 0.3]
+          rotate: [-15, 15]
+          mask_interpolation: 0
+          fill: 0
+          fill_mask: 0
+          p: 1.0
+    - _target_: albumentations.RandomBrightnessContrast
+      brightness_limit: 0.15
+      contrast_limit: 0.15
+      p: 0.3
+    - _target_: albumentations.HueSaturationValue
+      hue_shift_limit: 5
+      sat_shift_limit: 10
+      val_shift_limit: 5
+      p: 0.2
+    # At most one mild image-quality perturbation; masks are unchanged.
+    - _target_: albumentations.OneOf
+      p: 0.15
+      transforms:
+        - _target_: albumentations.GaussianBlur
+          blur_limit: [3, 3]
+          sigma_limit: [0.3, 0.7]
+          p: 1.0
+        - _target_: albumentations.GaussNoise
+          std_range: [0.01, 0.03]
+          mean_range: [0.0, 0.0]
+          p: 1.0

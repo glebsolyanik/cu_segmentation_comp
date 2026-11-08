@@ -1,0 +1,70 @@
+# @package _global_
+defaults:
+  - 012_unet_resnet18_pretrained_scale_shift
+  - _self_
+
+name: 013_unet_resnet18_pretrained_strong_color
+
+# Compare against 012: geometry and mild blur/noise unchanged.
+# One exposure/color transform on 65% of samples; each branch has 13% probability.
+data:
+  train_augmentations:
+    - _target_: albumentations.HorizontalFlip
+      p: 0.5
+    - _target_: albumentations.OneOf
+      p: 0.5
+      transforms:
+        - _target_: albumentations.Affine
+          scale: [0.85, 1.15]
+          keep_ratio: true
+          translate_percent: [-0.05, 0.05]
+          rotate: [-15, 15]
+          mask_interpolation: 0
+          fill: 0
+          fill_mask: 0
+          p: 1.0
+        - _target_: albumentations.Affine
+          scale: [0.4, 0.75]
+          keep_ratio: true
+          translate_percent: [-0.3, 0.3]
+          rotate: [-15, 15]
+          mask_interpolation: 0
+          fill: 0
+          fill_mask: 0
+          p: 1.0
+    # Apply one color/exposure policy, limiting compounded distortions.
+    - _target_: albumentations.OneOf
+      p: 0.65
+      transforms:
+        - _target_: albumentations.RandomBrightnessContrast
+          brightness_limit: 0.15
+          contrast_limit: 0.15
+          p: 1.0
+        - _target_: albumentations.RandomGamma
+          gamma_limit: [150, 240]
+          p: 1.0
+        - _target_: albumentations.RGBShift
+          r_shift_limit: 45
+          g_shift_limit: 45
+          b_shift_limit: 45
+          p: 1.0
+        - _target_: albumentations.HueSaturationValue
+          hue_shift_limit: 15
+          sat_shift_limit: 35
+          val_shift_limit: 20
+          p: 1.0
+        - _target_: albumentations.ToGray
+          num_output_channels: 3
+          p: 1.0
+    # At most one mild image-quality perturbation; masks are unchanged.
+    - _target_: albumentations.OneOf
+      p: 0.15
+      transforms:
+        - _target_: albumentations.GaussianBlur
+          blur_limit: [3, 3]
+          sigma_limit: [0.3, 0.7]
+          p: 1.0
+        - _target_: albumentations.GaussNoise
+          std_range: [0.01, 0.03]
+          mean_range: [0.0, 0.0]
+          p: 1.0
